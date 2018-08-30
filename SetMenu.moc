@@ -1,1 +1,25 @@
 dofile("etal\\lib\\keys.moc");	// load the function key lib
+
+local nDepartment = 12;
+
+function OnInit()
+{
+	
+}
+
+function BeforeKeyPress(nFile, nRecord, nKeytype)
+{
+	if(nFile != 1) // Not a PLU so move on
+	{
+		return true;
+	}
+	
+	local tThisPLU = ICR_GetPGMData(1,nRecord)
+	
+	if(tThisPLU.DEPT != nDepartment)
+	{
+		return true;
+	}
+	
+	ICR_MessageBox("You Did not charge for this course","","",1);
+}
