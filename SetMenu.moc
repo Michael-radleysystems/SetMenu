@@ -1,6 +1,8 @@
 dofile("etal\\lib\\keys.moc");	// load the function key lib
 
 local nDepartment = 12;
+local nCoursesForSale;
+local nSetCourseDepartment = 12; 
 
 function OnInit()
 {
@@ -23,14 +25,30 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 		return true;
 	}
 	
+	if(tThisPLU.DEPT == nSetCourseDepartment)
+	{
+		nCoursesForSale = nCoursesForSale + tThisPLU.PRICE4L1;
+		print (nCoursesForSale);
+	}
+	
+	
+	/*
+	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
+    {
+		
+	}
+	*/
 	//Chaeck to see if we have sold set menu courses
 	
 	//Count the number of courses sold
 	
-	//Deduct each item form the total amount of course sold
+	//Deduct each item form the total amount of course sold	
 	
-	// Display a message saying you did not charge for this course
-	ICR_MessageBox("You Did not charge for this course","","",0);
+	if(nCoursesForSale > 0)
+	{
+		// Display a message saying you did not charge for this course
+		ICR_MessageBox("You Did not charge for this course","","",0);
+	}
 	
 	//Stop the button press
 	return false;
