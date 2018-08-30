@@ -1,0 +1,1 @@
+dofile("etal\\lib\\keys.moc");	// load the function key lib

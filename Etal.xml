@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ETAL>
+	<FILE>SetMenu.moc</FILE>
+	<OUTPUTFILE>output.txt</OUTPUTFILE>
+	<NAME>Set Menu</NAME>
+	
+	<CREATED>30/08/2018</CREATED>
+	<LASTMODIFIED>30/08/2018</LASTMODIFIED>
+	<MINVERID>5540</MINVERID>
+	<AUTHOR>Michael.RadleySystems</AUTHOR>
+</ETAL>
