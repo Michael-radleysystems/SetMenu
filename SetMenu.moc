@@ -14,12 +14,24 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 		return true;
 	}
 	
+	//Grab the PLU 
 	local tThisPLU = ICR_GetPGMData(1,nRecord)
 	
+	//Is it one of our set menu	
 	if(tThisPLU.DEPT != nDepartment)
 	{
 		return true;
 	}
 	
-	ICR_MessageBox("You Did not charge for this course","","",1);
+	//Chaeck to see if we have sold set menu courses
+	
+	//Count the number of courses sold
+	
+	//Deduct each item form the total amount of course sold
+	
+	// Display a message saying you did not charge for this course
+	ICR_MessageBox("You Did not charge for this course","","",0);
+	
+	//Stop the button press
+	return false;
 }
