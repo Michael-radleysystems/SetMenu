@@ -2,11 +2,24 @@ dofile("etal\\lib\\keys.moc");	// load the function key lib
 
 local nDepartment = 12;
 local nCoursesForSale;
-local nSetCourseDepartment = 12; 
+local nSetCourseDepartment = 13; 
+local bDebugPrinting = false;
 
 function OnInit()
 {
+	// enable debug printing (or not)
+    ICR_EnableDebugLog(bDebugPrinting);
+    ICR_SetLocalUserData("bDebugPrinting",bDebugPrinting);
+    
+    //debug console 
+    if(bDebugPrinting)
+    {
+        // only set these if debug printing is on, we don't want to set console to false as there's only one and it'll stop any script loaded earlier from using it.
+        ICR_SetFeature("CONSOLE",bDebugPrinting);
+        ICR_SetFeature("AUTORESTART",bDebugPrinting);
+    }
 	
+	nCoursesForSale = 0;
 }
 
 function BeforeKeyPress(nFile, nRecord, nKeytype)
@@ -20,36 +33,38 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	local tThisPLU = ICR_GetPGMData(1,nRecord)
 	
 	//Is it one of our set menu	
-	if(tThisPLU.DEPT != nDepartment)
-	{
-		return true;
-	}
-	
-	if(tThisPLU.DEPT == nSetCourseDepartment)
-	{
-		nCoursesForSale = nCoursesForSale + tThisPLU.PRICE4L1;
-		print (nCoursesForSale);
-	}
-	
-	
-	/*
-	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
-    {
+	if(tThisPLU.DEPT == nDepartment || tThisPLU.DEPT == nSetCourseDepartment)
+	{	
+		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
-	}
-	*/
-	//Chaeck to see if we have sold set menu courses
+		if(tThisPLU.DEPT == nSetCourseDepartment)
+		{
+			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
+			nCoursesForSale = nCoursesForSale + tThisPLU.PRICE4L1;
+			if(bDebugPrinting) print ("Courses for sale after adding charged course "+nCoursesForSale);
+		}		
+				
+		//Chaeck to see if we have sold set menu courses
+		
+		//Count the number of courses sold
+		
+		//Deduct each item form the total amount of course sold	
+		
+		if(nCoursesForSale == 0)
+		{
+			// Display a message saying you did not charge for this course
+			ICR_MessageBox("You Did not charge for this course","","",0);
+			//Stop the button press
+			return false;
+		}
+		
+		if(tThisPLU.DEPT == nDepartment)
+		{
+			nCoursesForSale = nCoursesForSale-1;
+			if(bDebugPrinting) print ("Courses for sale after selling set menu course"+nCoursesForSale);
+		}
+	}	
 	
-	//Count the number of courses sold
-	
-	//Deduct each item form the total amount of course sold	
-	
-	if(nCoursesForSale > 0)
-	{
-		// Display a message saying you did not charge for this course
-		ICR_MessageBox("You Did not charge for this course","","",0);
-	}
-	
-	//Stop the button press
-	return false;
+	return true;		
 }
+
