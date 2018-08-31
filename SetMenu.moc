@@ -88,11 +88,18 @@ function AvaiableCourseCount()
 	}
 	
 	if(bDebugPrinting) print ("Count after looping through reg window: "+nCourseCount);
+	nCoursesForSale = nCourseCount;
+	if(bDebugPrinting) print ("Updated Courses for sale: "+ nCoursesForSale)
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
 {
 	if(nKeyType == 37)
+	{
+		AvaiableCourseCount();
+	}
+	
+	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
 	}
