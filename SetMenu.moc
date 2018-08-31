@@ -3,7 +3,7 @@ dofile("etal\\lib\\keys.moc");	// load the function key lib
 local nMenuItemDepartment = 12;
 local nCoursesForSale;
 local nSetCourseDepartment = 13; 
-local bDebugPrinting = true;
+local bDebugPrinting = false;
 
 function OnInit()
 {
@@ -24,18 +24,19 @@ function OnInit()
 
 function BeforeKeyPress(nFile, nRecord, nKeytype)
 {
-	if(nFile != 1) // Not a PLU so move on
-	{
-		return true;
-	}
-	
 	if(nKeytype == 7)
 	{
+		AvaiableCourseCount();
 		if(nCoursesForSale < 0 )
 		{
 			ICR_MessageBox("Too many Set Menu Items in sale","","",0);
 			return false;
 		}
+	}
+	
+	if(nFile != 1) // Not a PLU so move on
+	{
+		return true;
 	}
 	
 	//Grab the PLU 
@@ -59,7 +60,7 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 		
 		//Deduct each item form the total amount of course sold	
 		
-		if(nCoursesForSale == 0)
+		if(nCoursesForSale <= 0)
 		{
 			// Display a message saying you did not charge for this course
 			ICR_MessageBox("You Did not charge for this course","","",0);
