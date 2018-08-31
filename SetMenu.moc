@@ -3,7 +3,7 @@ dofile("etal\\lib\\keys.moc");	// load the function key lib
 local nMenuItemDepartment = 12;
 local nCoursesForSale;
 local nSetCourseDepartment = 13; 
-local bDebugPrinting = false;
+local bDebugPrinting = true;
 
 function OnInit()
 {
@@ -27,6 +27,15 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	if(nFile != 1) // Not a PLU so move on
 	{
 		return true;
+	}
+	
+	if(nKeytype == 7)
+	{
+		if(nCoursesForSale < 0 )
+		{
+			ICR_MessageBox("Too many Set Menu Items in sale","","",0);
+			return false;
+		}
 	}
 	
 	//Grab the PLU 
