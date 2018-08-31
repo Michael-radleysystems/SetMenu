@@ -1,6 +1,6 @@
 dofile("etal\\lib\\keys.moc");	// load the function key lib
 
-local nDepartment = 12;
+local nMenuItemDepartment = 12;
 local nCoursesForSale;
 local nSetCourseDepartment = 13; 
 local bDebugPrinting = false;
@@ -30,10 +30,10 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	}
 	
 	//Grab the PLU 
-	local tThisPLU = ICR_GetPGMData(1,nRecord)
+	local tThisPLU = ICR_GetPGMData(1,nRecord);
 	
 	//Is it one of our set menu	
-	if(tThisPLU.DEPT == nDepartment || tThisPLU.DEPT == nSetCourseDepartment)
+	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
@@ -63,11 +63,40 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 
 function AvaiableCourseCount()
 {
-
+	local tClerkBuffer = ICR_GetClerkBuffer_Index();
+	
+	local nCourseCount = 0;
+	
+	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
+    {
+        local tNextInLine = ICR_GetClerkBuffer_Item(nCount);
+        if(tNextInLine.FILE != 1)continue;
+		local tThisPLU = ICR_GetPGMData(1,tNextInLine.RECORD);
+		
+		if(tThisPLU.DEPT == nSetCourseDepartment)
+		{
+			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
+			nCourseCount = nCourseCount + tThisPLU.PRICE4L1;
+			if(bDebugPrinting) print ("Count after adding saleable courses in reg window: "+nCourseCount);
+		}
+		
+		if(tThisPLU.DEPT == nMenuItemDepartment)
+		{
+			nCourseCount = nCourseCount -1;
+			if(bDebugPrinting) print ("Count after deducting a set menu item in reg window: "+nCourseCount);
+		}
+	}
+	
+	if(bDebugPrinting) print ("Count after looping through reg window: "+nCourseCount);
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
 {
+	if(nKeyType == 37)
+	{
+		AvaiableCourseCount();
+	}
+	
 	if(nFile != 1)
 	{
 		return true; //not a PLU
@@ -76,9 +105,9 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	//Grab the PLU 
 	local tThisPLU = ICR_GetPGMData(1,nRecord)
 	
-	if(tThisPLU.DEPT == nDepartment)
+	if(tThisPLU.DEPT == nMenuItemDepartment)
 	{
-		nCoursesForSale = nCoursesForSale-1;
-		if(bDebugPrinting) print ("Courses for sale after selling set menu course"+nCoursesForSale);
+		nCoursesForSale = nCoursesForSale -1;
+		if(bDebugPrinting) print ("Courses for sale after selling set menu course "+nCoursesForSale);
 	}
 }
