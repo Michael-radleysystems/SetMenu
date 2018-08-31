@@ -68,3 +68,7 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	return true;		
 }
 
+function AvaiableCourseCount()
+{
+
+}
