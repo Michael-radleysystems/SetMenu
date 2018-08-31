@@ -56,19 +56,29 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 			ICR_MessageBox("You Did not charge for this course","","",0);
 			//Stop the button press
 			return false;
-		}
-		
-		if(tThisPLU.DEPT == nDepartment)
-		{
-			nCoursesForSale = nCoursesForSale-1;
-			if(bDebugPrinting) print ("Courses for sale after selling set menu course"+nCoursesForSale);
-		}
-	}	
-	
+		}		
+	}
 	return true;		
 }
 
 function AvaiableCourseCount()
 {
 
+}
+
+function AfterKeyPress(nFile, nRecord, nKeyType)
+{
+	if(nFile != 1)
+	{
+		return true; //not a PLU
+	}
+	
+	//Grab the PLU 
+	local tThisPLU = ICR_GetPGMData(1,nRecord)
+	
+	if(tThisPLU.DEPT == nDepartment)
+	{
+		nCoursesForSale = nCoursesForSale-1;
+		if(bDebugPrinting) print ("Courses for sale after selling set menu course"+nCoursesForSale);
+	}
 }
