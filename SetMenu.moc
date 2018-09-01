@@ -52,6 +52,7 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
 			nCoursesForSale = nCoursesForSale + tThisPLU.PRICE4L1;
 			if(bDebugPrinting) print ("Courses for sale after adding charged course "+nCoursesForSale);
+			return true;
 		}		
 				
 		//Chaeck to see if we have sold set menu courses
