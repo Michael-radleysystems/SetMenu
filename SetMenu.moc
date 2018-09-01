@@ -2,8 +2,16 @@ dofile("etal\\lib\\keys.moc");	// load the function key lib
 
 local nMenuItemDepartment = 12;
 local nCoursesForSale;
-local nSetCourseDepartment = 13; 
+local nSetCourseDepartment = 13;
+local nTitleFontSize = 24;
+local szFont = "Arial";
+local nWindowID = 0;
+local tbDimensions = {};
+local nData_StartY = 10, nData_YGap = 5;
+local g_nData_Height = 20;
+
 local bDebugPrinting = false;
+
 
 function OnInit()
 {
@@ -20,6 +28,15 @@ function OnInit()
     }
 	
 	nCoursesForSale = 0;
+	
+	nWindowID = ICR_SalesModeWindow_Add("window.xml");
+
+    //Enable a copy of the window we are going to use the window later
+    //to allow the user to select which clerks they want notes for
+    ICR_Window_Enable(nWindowID, false); 
+
+    //get dimensions of the window we just created
+    tbDimensions = ICR_GetWindowDimensions(nWindowID);
 }
 
 function BeforeKeyPress(nFile, nRecord, nKeytype)
@@ -29,7 +46,7 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 		AvaiableCourseCount();
 		if(nCoursesForSale < 0 )
 		{
-			ICR_MessageBox("Too many Set Menu Items in sale","","",0);
+			ICR_MessageBox("Not all Set Menu Items are charged for.","","",0);
 			return false;
 		}
 	}
@@ -69,7 +86,27 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 			return false;
 		}		
 	}
+	ICR_Window_Enable(nWindowID, true);
 	return true;		
+}
+
+function OnWindowPaint(nID)
+{
+    //another function call from ICRTouch askng what needs to happen to make our window redraw
+    if(nID == nWindowID)
+    {
+        Paint_Window();
+    }
+}
+
+function Paint_Window()
+{
+	nTitleFont = ICR_CreateFont(szFont, nTitleFontSize);
+	ICR_SelectFont(nTitleFont);
+	ICR_SetText_VAlign(0);
+	ICR_SetText_HAlign(0);
+	ICR_SetText_Colour(0xFAFAFA);
+	ICR_DrawText(10, 704, nCoursesForSale);
 }
 
 function AvaiableCourseCount()
