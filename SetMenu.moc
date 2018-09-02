@@ -1,14 +1,15 @@
-dofile("etal\\lib\\keys.moc");	// load the function key lib
+dofile("etal\\lib\\keys.moc");	// load the function key lib 
 
 local nMenuItemDepartment = 12;
 local nCoursesForSale;
 local nSetCourseDepartment = 13;
-local nTitleFontSize = 24;
+local nTitleFontSize = 16;
 local szFont = "Arial";
 local nWindowID = 0;
 local tbDimensions = {};
 local nData_StartY = 10, nData_YGap = 5;
-local g_nData_Height = 20;
+local g_nData_Height = 30;
+local nAfterSaleTimer = 0;
 
 local bDebugPrinting = false;
 
@@ -64,6 +65,9 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
+		ICR_Window_Enable(nWindowID, true);		
+		ICR_RedrawWindow(21, nWindowID);
+						
 		if(tThisPLU.DEPT == nSetCourseDepartment)
 		{
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
@@ -85,15 +89,14 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 			//Stop the button press
 			return false;
 		}		
-	}
-	ICR_Window_Enable(nWindowID, true);
+	}	
 	return true;		
 }
 
 function OnWindowPaint(nID)
 {
     //another function call from ICRTouch askng what needs to happen to make our window redraw
-    if(nID == nWindowID)
+	if(nID == nWindowID)
     {
         Paint_Window();
     }
@@ -101,12 +104,12 @@ function OnWindowPaint(nID)
 
 function Paint_Window()
 {
-	nTitleFont = ICR_CreateFont(szFont, nTitleFontSize);
+	local nTitleFont = ICR_CreateFont(szFont, nTitleFontSize);
 	ICR_SelectFont(nTitleFont);
 	ICR_SetText_VAlign(0);
 	ICR_SetText_HAlign(0);
-	ICR_SetText_Colour(0xFAFAFA);
-	ICR_DrawText(10, 704, nCoursesForSale);
+	ICR_SetText_Colour(0xFFFFFF);	
+	ICR_DrawText(0, 0, "Cs: "+nCoursesForSale);
 }
 
 function AvaiableCourseCount()
@@ -158,11 +161,11 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	}
 	
 	//Grab the PLU 
-	local tThisPLU = ICR_GetPGMData(1,nRecord)
-	
-	if(tThisPLU.DEPT == nMenuItemDepartment)
+	local tThisPLU = ICR_GetPGMData(1,nRecord);
+	//Is it one of our set menu
+	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
 	{
-		nCoursesForSale = nCoursesForSale -1;
-		if(bDebugPrinting) print ("Courses for sale after selling set menu course "+nCoursesForSale);
+		AvaiableCourseCount();
+		ICR_RedrawWindow(21, nWindowID);
 	}
 }
