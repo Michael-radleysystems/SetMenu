@@ -1,4 +1,4 @@
-dofile("etal\\lib\\keys.moc");	// load the function key lib 
+dofile("etal\\lib\\keys.moc");	// load the function key lib
 
 local nMenuItemDepartment = 12;
 local nCoursesForSale;
@@ -9,7 +9,7 @@ local nWindowID = 0;
 local tbDimensions = {};
 local nData_StartY = 10, nData_YGap = 5;
 local g_nData_Height = 30;
-local nAfterSaleTimer = 0;
+local nTimer = 0;
 
 local bDebugPrinting = false;
 
@@ -65,9 +65,8 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
-		ICR_Window_Enable(nWindowID, true);		
-		ICR_RedrawWindow(21, nWindowID);
-						
+		ICR_Window_Enable(nWindowID, true);
+		
 		if(tThisPLU.DEPT == nSetCourseDepartment)
 		{
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
@@ -144,7 +143,7 @@ function AvaiableCourseCount()
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
-{
+{	
 	if(nKeyType == 37)
 	{
 		AvaiableCourseCount();
@@ -153,6 +152,12 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
+	}
+	
+	if(nKeyType > 0 && nKeyType < 8)
+	{
+		ICR_Window_Enable(nWindowID, false);
+		ICR_RedrawWindow(21, nWindowID);
 	}
 	
 	if(nFile != 1)
@@ -165,7 +170,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	//Is it one of our set menu
 	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
 	{
-		AvaiableCourseCount();
+		AvaiableCourseCount();		
 		ICR_RedrawWindow(21, nWindowID);
 	}
 }
