@@ -10,6 +10,7 @@ local tbDimensions = {};
 local nData_StartY = 10, nData_YGap = 5;
 local g_nData_Height = 30;
 local nTimer = 0;
+local bDisplayWindow = false;
 
 local bDebugPrinting = false;
 
@@ -29,7 +30,7 @@ function OnInit()
     }
 	
 	nCoursesForSale = 0;
-	
+		
 	nWindowID = ICR_SalesModeWindow_Add("window.xml");
 
     //Enable a copy of the window we are going to use the window later
@@ -40,9 +41,9 @@ function OnInit()
     tbDimensions = ICR_GetWindowDimensions(nWindowID);
 }
 
-function BeforeKeyPress(nFile, nRecord, nKeytype)
+function BeforeKeyPress(nFile, nRecord, nKeyType)
 {
-	if(nKeytype == 7)
+	if(nKeyType > 0 && nKeyType < 8)
 	{
 		AvaiableCourseCount();
 		if(nCoursesForSale < 0 )
@@ -61,25 +62,11 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	local tThisPLU = ICR_GetPGMData(1,nRecord);
 	
 	//Is it one of our set menu	
-	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
+	if(tThisPLU.DEPT == nMenuItemDepartment)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
-		ICR_Window_Enable(nWindowID, true);
-		
-		if(tThisPLU.DEPT == nSetCourseDepartment)
-		{
-			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
-			nCoursesForSale = nCoursesForSale + tThisPLU.PRICE4L1;
-			if(bDebugPrinting) print ("Courses for sale after adding charged course "+nCoursesForSale);
-			return true;
-		}		
-				
-		//Chaeck to see if we have sold set menu courses
-		
-		//Count the number of courses sold
-		
-		//Deduct each item form the total amount of course sold	
+		AvaiableCourseCount();		
 		
 		if(nCoursesForSale <= 0)
 		{
@@ -128,12 +115,14 @@ function AvaiableCourseCount()
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
 			nCourseCount = nCourseCount + tThisPLU.PRICE4L1;
 			if(bDebugPrinting) print ("Count after adding saleable courses in reg window: "+nCourseCount);
+			bDisplayWindow = true;
 		}
 		
 		if(tThisPLU.DEPT == nMenuItemDepartment)
 		{
 			nCourseCount = nCourseCount -1;
 			if(bDebugPrinting) print ("Count after deducting a set menu item in reg window: "+nCourseCount);
+			bDisplayWindow = true;
 		}
 	}
 	
@@ -147,17 +136,19 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	if(nKeyType == 37)
 	{
 		AvaiableCourseCount();
+		RedrawWindow();
 	}
 	
 	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
+		RedrawWindow();
 	}
 	
 	if(nKeyType > 0 && nKeyType < 8)
 	{
-		ICR_Window_Enable(nWindowID, false);
-		ICR_RedrawWindow(21, nWindowID);
+		bDisplayWindow = false
+		RedrawWindow();
 	}
 	
 	if(nFile != 1)
@@ -170,7 +161,13 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	//Is it one of our set menu
 	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
 	{
-		AvaiableCourseCount();		
-		ICR_RedrawWindow(21, nWindowID);
+		AvaiableCourseCount();
+		RedrawWindow();
 	}
+}
+
+function RedrawWindow()
+{
+	ICR_Window_Enable(nWindowID, bDisplayWindow);
+	ICR_RedrawWindow(21, nWindowID);
 }
