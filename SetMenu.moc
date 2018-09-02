@@ -1,19 +1,16 @@
 dofile("etal\\lib\\keys.moc");	// load the function key lib
 
-local nMenuItemDepartment = 12;
-local nCoursesForSale;
-local nSetCourseDepartment = 13;
-local nTitleFontSize = 16;
+local nSetMenuStDtDpt = 12;
+local nSetMenuMainDpt = 13;
+local nSetCourseDepartment = 14;
+local nSDForSale = 0;
+local nMainForSale = 0;
+local nFontSize = 16;
 local szFont = "Arial";
 local nWindowID = 0;
 local tbDimensions = {};
-local nData_StartY = 10, nData_YGap = 5;
-local g_nData_Height = 30;
-local nTimer = 0;
 local bDisplayWindow = false;
-
 local bDebugPrinting = false;
-
 
 function OnInit()
 {
@@ -29,8 +26,7 @@ function OnInit()
         ICR_SetFeature("AUTORESTART",bDebugPrinting);
     }
 	
-	nCoursesForSale = 0;
-		
+	//Create a window ID from our window xml
 	nWindowID = ICR_SalesModeWindow_Add("window.xml");
 
     //Enable a copy of the window we are going to use the window later
@@ -46,11 +42,20 @@ function BeforeKeyPress(nFile, nRecord, nKeyType)
 	if(nKeyType > 0 && nKeyType < 8)
 	{
 		AvaiableCourseCount();
-		if(nCoursesForSale < 0 )
+		if(nSDForSale < 0 || nMainForSale < 0)
 		{
 			ICR_MessageBox("Not all Set Menu Items are charged for.","","",0);
 			return false;
 		}
+		
+		if((nSDForSale > 0 || nMainForSale > 0) && (nKeyType != 7))
+		{
+			if(ICR_MessageBox("You have unused courses","Continue","",1))
+			{
+				return true;
+			}
+			return false;
+		}		
 	}
 	
 	if(nFile != 1) // Not a PLU so move on
@@ -62,13 +67,28 @@ function BeforeKeyPress(nFile, nRecord, nKeyType)
 	local tThisPLU = ICR_GetPGMData(1,nRecord);
 	
 	//Is it one of our set menu	
-	if(tThisPLU.DEPT == nMenuItemDepartment)
+	if(tThisPLU.DEPT == nSetMenuStDtDpt)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
 		AvaiableCourseCount();		
 		
-		if(nCoursesForSale <= 0)
+		if(nSDForSale <= 0)
+		{
+			// Display a message saying you did not charge for this course
+			ICR_MessageBox("You Did not charge for this course","","",0);
+			//Stop the button press
+			return false;
+		}		
+	}
+	
+	if(tThisPLU.DEPT == nSetMenuMainDpt)
+	{	
+		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
+		
+		AvaiableCourseCount();		
+		
+		if(nMainForSale <= 0)
 		{
 			// Display a message saying you did not charge for this course
 			ICR_MessageBox("You Did not charge for this course","","",0);
@@ -90,19 +110,20 @@ function OnWindowPaint(nID)
 
 function Paint_Window()
 {
-	local nTitleFont = ICR_CreateFont(szFont, nTitleFontSize);
+	local nTitleFont = ICR_CreateFont(szFont, nFontSize);
 	ICR_SelectFont(nTitleFont);
 	ICR_SetText_VAlign(0);
 	ICR_SetText_HAlign(0);
 	ICR_SetText_Colour(0xFFFFFF);	
-	ICR_DrawText(0, 0, "Cs: "+nCoursesForSale);
+	ICR_DrawText(0, 0, "S/D: "+nSDForSale+" M: "+nMainForSale);
 }
 
 function AvaiableCourseCount()
 {
 	local tClerkBuffer = ICR_GetClerkBuffer_Index();
 	
-	local nCourseCount = 0;
+	local nTempMain = 0;
+	local nTempSD = 0;
 	
 	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
     {
@@ -113,22 +134,37 @@ function AvaiableCourseCount()
 		if(tThisPLU.DEPT == nSetCourseDepartment)
 		{
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
-			nCourseCount = nCourseCount + tThisPLU.PRICE4L1;
-			if(bDebugPrinting) print ("Count after adding saleable courses in reg window: "+nCourseCount);
+			
+			if(tThisPLU.PRICE4L1 > 1)
+			{
+				nTempMain++;
+				nTempSD = nTempSD + tThisPLU.PRICE4L1 -1;
+			}
+			else
+			{
+				nTempSD++;
+			}
+			
 			bDisplayWindow = true;
 		}
 		
-		if(tThisPLU.DEPT == nMenuItemDepartment)
+		if(tThisPLU.DEPT == nSetMenuStDtDpt)
 		{
-			nCourseCount = nCourseCount -1;
-			if(bDebugPrinting) print ("Count after deducting a set menu item in reg window: "+nCourseCount);
+			nTempSD--;
+			bDisplayWindow = true;
+		}
+		
+		if(tThisPLU.DEPT == nSetMenuMainDpt)
+		{
+			nTempMain--;
 			bDisplayWindow = true;
 		}
 	}
 	
-	if(bDebugPrinting) print ("Count after looping through reg window: "+nCourseCount);
-	nCoursesForSale = nCourseCount;
-	if(bDebugPrinting) print ("Updated Courses for sale: "+ nCoursesForSale)
+	if(bDebugPrinting) print ("Count after looping through reg window: S/D: "+nTempSD+" M: "+nTempMain);	
+	nSDForSale = nTempSD;
+	nMainForSale = nTempMain;
+	if(bDebugPrinting) print ("Updated Courses for sale S/D: "+nSDForSale+" M: "+nMainForSale);
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
@@ -159,7 +195,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	//Grab the PLU 
 	local tThisPLU = ICR_GetPGMData(1,nRecord);
 	//Is it one of our set menu
-	if(tThisPLU.DEPT == nMenuItemDepartment || tThisPLU.DEPT == nSetCourseDepartment)
+	if(tThisPLU.DEPT == nSetMenuStDtDpt || tThisPLU.DEPT == nSetCourseDepartment || tThisPLU.DEPT == nSetMenuMainDpt)
 	{
 		AvaiableCourseCount();
 		RedrawWindow();
