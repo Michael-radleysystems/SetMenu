@@ -11,6 +11,7 @@ local nWindowID = 0;
 local tbDimensions = {};
 local bDisplayWindow = false;
 local bDebugPrinting = false;
+local nTimer = 0;
 
 function OnInit()
 {
@@ -117,6 +118,7 @@ function OnWindowPaint(nID)
     {
         Paint_Window();
     }
+	nTimer = ICR_StartTimer(500);
 }
 
 function Paint_Window()
@@ -236,4 +238,13 @@ function RedrawWindow()
 {
 	ICR_Window_Enable(nWindowID, bDisplayWindow);
 	ICR_RedrawWindow(21, nWindowID);
+}
+
+function OnTimer(nTimerID,nSysTime)
+{
+	if(nTimerID == nTimer)
+	{
+		ICR_StopTimer(nTimerID);
+		RedrawWindow();
+	}
 }
