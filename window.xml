@@ -1,5 +1,5 @@
 <SKIN>
-  <WINDOW left="715" top="477" width="100" height="35">  
+  <WINDOW left="715" top="477" width="100" height="20">  
   <BACKGROUND image="window.bmp" TransparentColour="00FF00FF" />
 </WINDOW>
 </SKIN>
