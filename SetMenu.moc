@@ -39,17 +39,22 @@ function OnInit()
 
 function BeforeKeyPress(nFile, nRecord, nKeyType)
 {
+	//Check if the keytype is a finalize or other charge type
 	if(nKeyType > 0 && nKeyType < 8)
 	{
+		//Call a count 
 		AvaiableCourseCount();
+		//check if any courses are negitive
 		if(nSDForSale < 0 || nMainForSale < 0)
 		{
+			//Inform the user they have to charge for a course
 			ICR_MessageBox("Not all Set Menu Items are charged for.","","",0);
 			return false;
 		}
-		
+		//Check if we have any unused course and are we selling 
 		if((nSDForSale > 0 || nMainForSale > 0) && (nKeyType != 7))
 		{
+			//Ask the user do they wish to complete the sale
 			if(ICR_MessageBox("You have unused courses","Continue","",1))
 			{
 				return true;
@@ -58,7 +63,8 @@ function BeforeKeyPress(nFile, nRecord, nKeyType)
 		}		
 	}
 	
-	if(nFile != 1) // Not a PLU so move on
+	//Check for other buttons
+	if(nFile != 1) 
 	{
 		return true;
 	}
@@ -66,13 +72,15 @@ function BeforeKeyPress(nFile, nRecord, nKeyType)
 	//Grab the PLU 
 	local tThisPLU = ICR_GetPGMData(1,nRecord);
 	
-	//Is it one of our set menu	
+	//Is it one of our set menu	starters or desserts
 	if(tThisPLU.DEPT == nSetMenuStDtDpt)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
+		//Call a Count
 		AvaiableCourseCount();		
 		
+		//Do we have enough courses left for a sale
 		if(nSDForSale <= 0)
 		{
 			// Display a message saying you did not charge for this course
@@ -82,12 +90,15 @@ function BeforeKeyPress(nFile, nRecord, nKeyType)
 		}		
 	}
 	
+	//Is it one of our set menu	Mains
 	if(tThisPLU.DEPT == nSetMenuMainDpt)
 	{	
 		if(bDebugPrinting) print("Department of plu pressed: "+tThisPLU.DEPT);
 		
+		//Call a Count
 		AvaiableCourseCount();		
 		
+		//Do we have enough courses left for a sale
 		if(nMainForSale <= 0)
 		{
 			// Display a message saying you did not charge for this course
@@ -110,6 +121,7 @@ function OnWindowPaint(nID)
 
 function Paint_Window()
 {
+	//Creae a Window to be painted to the screem
 	local nTitleFont = ICR_CreateFont(szFont, nFontSize);
 	ICR_SelectFont(nTitleFont);
 	ICR_SetText_VAlign(0);
@@ -120,21 +132,28 @@ function Paint_Window()
 
 function AvaiableCourseCount()
 {
+	//Call the cleark buffer
 	local tClerkBuffer = ICR_GetClerkBuffer_Index();
 	
+	//Set the temp counts to zero
 	local nTempMain = 0;
 	local nTempSD = 0;
 	
+	//loop through the buffer
 	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
     {
+		//Call in the next line in the buffer
         local tNextInLine = ICR_GetClerkBuffer_Item(nCount);
+		//Continue to the next itteration of the loop if it is not a plu
         if(tNextInLine.FILE != 1)continue;
 		local tThisPLU = ICR_GetPGMData(1,tNextInLine.RECORD);
 		
+		//Is this one of our course counters
 		if(tThisPLU.DEPT == nSetCourseDepartment)
 		{
 			if(bDebugPrinting) print("Price level 4: "+tThisPLU.PRICE4L1);
 			
+			//Check if the number of courses is grater than 1
 			if(tThisPLU.PRICE4L1 > 1)
 			{
 				nTempMain++;
@@ -145,15 +164,18 @@ function AvaiableCourseCount()
 				nTempSD++;
 			}
 			
+			// Set the window to display
 			bDisplayWindow = true;
 		}
 		
+		//Remove a starter or dessert course
 		if(tThisPLU.DEPT == nSetMenuStDtDpt)
 		{
 			nTempSD--;
 			bDisplayWindow = true;
 		}
 		
+		//Remove a main course
 		if(tThisPLU.DEPT == nSetMenuMainDpt)
 		{
 			nTempMain--;
@@ -161,32 +183,39 @@ function AvaiableCourseCount()
 		}
 	}
 	
-	if(bDebugPrinting) print ("Count after looping through reg window: S/D: "+nTempSD+" M: "+nTempMain);	
+	if(bDebugPrinting) print ("Count after looping through reg window: S/D: "+nTempSD+" M: "+nTempMain);
+	
+	//Set the counted courses to for sale courses
 	nSDForSale = nTempSD;
 	nMainForSale = nTempMain;
+	
 	if(bDebugPrinting) print ("Updated Courses for sale S/D: "+nSDForSale+" M: "+nMainForSale);
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
 {	
+	//After an error correct count and redraw
 	if(nKeyType == 37)
 	{
 		AvaiableCourseCount();
 		RedrawWindow();
 	}
 	
+	//After floor plan count and redraw
 	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
 		RedrawWindow();
 	}
 	
+	//After a finalize key or charge stop displaying the window and redraw
 	if(nKeyType > 0 && nKeyType < 8)
 	{
 		bDisplayWindow = false
 		RedrawWindow();
 	}
 	
+	//After a button press check if it is a plu
 	if(nFile != 1)
 	{
 		return true; //not a PLU
@@ -194,7 +223,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	
 	//Grab the PLU 
 	local tThisPLU = ICR_GetPGMData(1,nRecord);
-	//Is it one of our set menu
+	//Is it one of our set menu count and redraw
 	if(tThisPLU.DEPT == nSetMenuStDtDpt || tThisPLU.DEPT == nSetCourseDepartment || tThisPLU.DEPT == nSetMenuMainDpt)
 	{
 		AvaiableCourseCount();
@@ -202,6 +231,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	}
 }
 
+//function for redrawing our window
 function RedrawWindow()
 {
 	ICR_Window_Enable(nWindowID, bDisplayWindow);
