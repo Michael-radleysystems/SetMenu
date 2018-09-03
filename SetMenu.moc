@@ -118,7 +118,11 @@ function OnWindowPaint(nID)
     {
         Paint_Window();
     }
-	nTimer = ICR_StartTimer(500);
+	//If the window is painted we can repaint 5 ms after
+	if(bDisplayWindow)
+	{
+		nTimer = ICR_StartTimer(5);
+	}	
 }
 
 function Paint_Window()
@@ -140,6 +144,7 @@ function AvaiableCourseCount()
 	//Set the temp counts to zero
 	local nTempMain = 0;
 	local nTempSD = 0;
+	local nCountFlag = 0;
 	
 	//loop through the buffer
 	for(local nCount = 1 ; nCount <= tClerkBuffer.REGPOS ; nCount++)
@@ -168,6 +173,7 @@ function AvaiableCourseCount()
 			
 			// Set the window to display
 			bDisplayWindow = true;
+			nCountFlag++;
 		}
 		
 		//Remove a starter or dessert course
@@ -175,6 +181,7 @@ function AvaiableCourseCount()
 		{
 			nTempSD--;
 			bDisplayWindow = true;
+			nCountFlag++;
 		}
 		
 		//Remove a main course
@@ -182,7 +189,15 @@ function AvaiableCourseCount()
 		{
 			nTempMain--;
 			bDisplayWindow = true;
+			nCountFlag++;
 		}
+	}
+	
+	//Was there any of our set menu items in the sale
+	if(nCountFlag == 0)
+	{
+		//Set the window not to show
+		bDisplayWindow = false;
 	}
 	
 	if(bDebugPrinting) print ("Count after looping through reg window: S/D: "+nTempSD+" M: "+nTempMain);
@@ -195,27 +210,26 @@ function AvaiableCourseCount()
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
-{	
+{		
 	//After an error correct count and redraw
 	if(nKeyType == 37)
 	{
 		AvaiableCourseCount();
-		//RedrawWindow();
 	}
 	
 	//After floor plan count and redraw
 	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
-		//RedrawWindow();
 	}
 	
 	//After a finalize key or charge stop displaying the window and redraw
 	if(nKeyType > 0 && nKeyType < 8)
 	{
 		bDisplayWindow = false
-		//RedrawWindow();
 	}
+	
+	RedrawWindow();
 	
 	//After a button press check if it is a plu
 	if(nFile != 1)
@@ -228,9 +242,10 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	//Is it one of our set menu count and redraw
 	if(tThisPLU.DEPT == nSetMenuStDtDpt || tThisPLU.DEPT == nSetCourseDepartment || tThisPLU.DEPT == nSetMenuMainDpt)
 	{
-		AvaiableCourseCount();
-		//RedrawWindow();
+		AvaiableCourseCount();		
 	}
+	//Redraw after every plu
+	RedrawWindow();
 }
 
 //function for redrawing our window
@@ -240,6 +255,7 @@ function RedrawWindow()
 	ICR_RedrawWindow(21, nWindowID);
 }
 
+//Timer called to redraw my window
 function OnTimer(nTimerID,nSysTime)
 {
 	if(nTimerID == nTimer)
