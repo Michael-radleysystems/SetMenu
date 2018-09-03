@@ -200,21 +200,21 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	if(nKeyType == 37)
 	{
 		AvaiableCourseCount();
-		RedrawWindow();
+		//RedrawWindow();
 	}
 	
 	//After floor plan count and redraw
 	if(nKeyType == 62)
 	{
 		AvaiableCourseCount();
-		RedrawWindow();
+		//RedrawWindow();
 	}
 	
 	//After a finalize key or charge stop displaying the window and redraw
 	if(nKeyType > 0 && nKeyType < 8)
 	{
 		bDisplayWindow = false
-		RedrawWindow();
+		//RedrawWindow();
 	}
 	
 	//After a button press check if it is a plu
@@ -229,7 +229,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	if(tThisPLU.DEPT == nSetMenuStDtDpt || tThisPLU.DEPT == nSetCourseDepartment || tThisPLU.DEPT == nSetMenuMainDpt)
 	{
 		AvaiableCourseCount();
-		RedrawWindow();
+		//RedrawWindow();
 	}
 }
 
