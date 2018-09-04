@@ -41,7 +41,7 @@ function OnInit()
 function BeforeKeyPress(nFile, nRecord, nKeyType)
 {
 	//Check if the keytype is a finalize or other charge type
-	if(nKeyType > 0 && nKeyType < 8)
+	if((nKeyType > 0 && nKeyType < 8) || nKeyType == 11 || nKeyType == 13 || ((nKeyType == 110 && nRecord > 186)&&(nKeyType == 110 && nRecord < 191)))
 	{
 		//Call a count 
 		AvaiableCourseCount();
@@ -121,7 +121,7 @@ function OnWindowPaint(nID)
 	//If the window is painted we can repaint 5 ms after
 	if(bDisplayWindow)
 	{
-		nTimer = ICR_StartTimer(5);
+		nTimer = ICR_StartTimer(10);
 	}	
 }
 
@@ -224,7 +224,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	}
 	
 	//After a finalize key or charge stop displaying the window and redraw
-	if(nKeyType > 0 && nKeyType < 8)
+	if((nKeyType > 0 && nKeyType < 8) || nKeyType == 11 || nKeyType == 13)
 	{
 		bDisplayWindow = false
 	}
