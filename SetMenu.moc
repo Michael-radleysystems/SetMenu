@@ -117,12 +117,7 @@ function OnWindowPaint(nID)
 	if(nID == nWindowID)
     {
         Paint_Window();
-    }
-	//If the window is painted we can repaint 5 ms after
-	if(bDisplayWindow)
-	{
-		nTimer = ICR_StartTimer(10);
-	}	
+    }	
 }
 
 function Paint_Window()
@@ -224,7 +219,7 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 	}
 	
 	//After a finalize key or charge stop displaying the window and redraw
-	if((nKeyType > 0 && nKeyType < 8) || nKeyType == 11 || nKeyType == 13)
+	if((nKeyType > 0 && nKeyType < 8) || nKeyType == 11 || nKeyType == 13 || ((nKeyType == 110 && nRecord > 186)&&(nKeyType == 110 && nRecord < 191)))
 	{
 		bDisplayWindow = false
 	}
@@ -245,6 +240,11 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 		AvaiableCourseCount();		
 	}
 	//Redraw after every plu
+	RedrawWindow();
+}
+
+function AfterRegItemSelect(nItem)
+{
 	RedrawWindow();
 }
 
