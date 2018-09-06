@@ -66,6 +66,11 @@ function AfterModeChange(nFrom,nTo)
 
 function BeforeKeyPress(nFile, nRecord, nKeyType)
 {
+	if(!bEnabled)
+	{
+		return true;
+	}
+	
 	//Check if the keytype is a finalize or other charge type
 	if((nKeyType > 0 && nKeyType < 8) || nKeyType == 11 || nKeyType == 13 || ((nKeyType == 110 && nRecord > 186)&&(nKeyType == 110 && nRecord < 191)))
 	{
@@ -231,7 +236,12 @@ function AvaiableCourseCount()
 }
 
 function AfterKeyPress(nFile, nRecord, nKeyType)
-{		
+{	
+	if(!bEnabled)
+	{
+		return true;
+	}
+	
 	//After an error correct count and redraw
 	if(nKeyType == 37)
 	{
