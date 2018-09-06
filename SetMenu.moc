@@ -11,6 +11,7 @@ local nWindowID = 0;
 local tbDimensions = {};
 local bDisplayWindow = false;
 local bDebugPrinting = false;
+local bEnabled = true;
 local nTimer = 0;
 
 function OnInit()
@@ -36,6 +37,22 @@ function OnInit()
 
     //get dimensions of the window we just created
     tbDimensions = ICR_GetWindowDimensions(nWindowID);
+	
+	ICR_SetLocalUserData("nSetMenuStDtDpt", nSetMenuStDtDpt, true);
+	ICR_SetLocalUserData("nSetMenuMainDpt", nSetMenuMainDpt, true);
+	ICR_SetLocalUserData("nSetCourseDepartment", nSetCourseDepartment, true);	
+}
+
+function AfterModeChange(nFrom,nTo)
+{
+	if(nFrom != 10)
+	{
+		return;
+	}
+	
+	ICR_SetLocalUserData("bDebugPrinting",bDebugPrinting);
+	
+	
 }
 
 function BeforeKeyPress(nFile, nRecord, nKeyType)
@@ -262,6 +279,63 @@ function OnTimer(nTimerID,nSysTime)
 	{
 		ICR_StopTimer(nTimerID);
 		RedrawWindow();
+	}
+}
+
+function OnEnterPGMMenu(nSub)
+{
+	local nID=0;
+	ICR_PurgeProgramSettings();
+	switch(nSub)
+	{
+		case 0:
+			nID = ICR_AdvertiseProgramSetting("Starter and Desert Department","nSetMenuStDtDpt");			
+			ICR_ProgramItem_SetOptionList(nID,1);
+			nID = ICR_AdvertiseProgramSetting("Mains Department","nSetMenuMainDpt");			
+			ICR_ProgramItem_SetOptionList(nID,2);
+			nID = ICR_AdvertiseProgramSetting("Set Menu Course Department","nSetCourseDepartment");			
+			ICR_ProgramItem_SetOptionList(nID,3);
+			break;
+		default:
+			ICR_AdvertiseProgramHeading("This menu doesn't exist");
+			break;
+	}
+}
+
+function OnEnterPGMOptionList(nID)
+{
+	ICR_PurgeProgramOptionList();
+	
+	local nMax = ICR_GetFileSize(55);
+	
+	switch(nID)	
+	{
+		case 1:
+			ICR_ProgramOptionList_Add("NOT USED",0);
+			for (local nCount = 1; nCount <= nMax; nCount++)
+            {
+                local tThisPGM = ICR_GetPGMData(55,nCount);
+                ICR_ProgramOptionList_Add(tThisPGM.NAME,nCount);
+            }
+			break;
+		case 2:
+			ICR_ProgramOptionList_Add("NOT USED",0);
+			for (local nCount = 1; nCount <= nMax; nCount++)
+            {
+                local tThisPGM = ICR_GetPGMData(55,nCount);
+                ICR_ProgramOptionList_Add(tThisPGM.NAME,nCount);
+            }
+			break;
+		case 3:
+			ICR_ProgramOptionList_Add("NOT USED",0);
+			for (local nCount = 1; nCount <= nMax; nCount++)
+            {
+                local tThisPGM = ICR_GetPGMData(55,nCount);
+                ICR_ProgramOptionList_Add(tThisPGM.NAME,nCount);
+            }
+			break;
+		default:
+			break;
 	}
 }
 
