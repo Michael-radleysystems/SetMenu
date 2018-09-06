@@ -38,9 +38,15 @@ function OnInit()
     //get dimensions of the window we just created
     tbDimensions = ICR_GetWindowDimensions(nWindowID);
 	
+	
+	//set all the setting in to the local settings 
+	ICR_SetLocalUserData("bEnabled",bEnabled,true)
 	ICR_SetLocalUserData("nSetMenuStDtDpt", nSetMenuStDtDpt, true);
 	ICR_SetLocalUserData("nSetMenuMainDpt", nSetMenuMainDpt, true);
-	ICR_SetLocalUserData("nSetCourseDepartment", nSetCourseDepartment, true);	
+	ICR_SetLocalUserData("nSetCourseDepartment", nSetCourseDepartment, true);
+	
+	//do a mode change to load setting.
+	AfterModeChange(10,7);
 }
 
 function AfterModeChange(nFrom,nTo)
@@ -52,7 +58,10 @@ function AfterModeChange(nFrom,nTo)
 	
 	ICR_SetLocalUserData("bDebugPrinting",bDebugPrinting);
 	
-	
+	bEnabled = ICR_GetLocalUserData("bEnabled");
+	nSetMenuStDtDpt = ICR_GetLocalUserData("nSetMenuStDtDpt");
+	nSetMenuMainDpt = ICR_GetLocalUserData("nSetMenuMainDpt");
+	nSetCourseDepartment = ICR_GetLocalUserData("nSetCourseDepartment");
 }
 
 function BeforeKeyPress(nFile, nRecord, nKeyType)
@@ -289,6 +298,7 @@ function OnEnterPGMMenu(nSub)
 	switch(nSub)
 	{
 		case 0:
+			ICR_AdvertiseProgramSetting("Set Menu is enabled","bEnabled");
 			nID = ICR_AdvertiseProgramSetting("Starter and Desert Department","nSetMenuStDtDpt");			
 			ICR_ProgramItem_SetOptionList(nID,1);
 			nID = ICR_AdvertiseProgramSetting("Mains Department","nSetMenuMainDpt");			
